@@ -76,15 +76,33 @@ This repository contains test automation framework designed for **UI (GUI)** and
    HEADLESS=true
    ```
 
+---
+
 ## 🚀 Execution Commands
 
-| Command | Description |
-| `npm run test` | Runs all feature files (GUI & API) |
-| `npm run test:ui` | Runs only UI tests (tagged @ui) |
-| `npm run test:api` | Runs only API tests (tagged @api) |
-| `npm run report` | Generates the HTML report from existing JSON results |
-| `npm run clean` | Deletes the test-results folder |
-| `npm run install:browsers` | Install Playwright Browsers (Chromium for demo) |
+This framework uses standard `npm` scripts to trigger different test suites. You can append additional Cucumber flags (like `--tags`) to any of these commands for more granular control.
+
+| Command                    | Description                                   | Target / Tag    |
+| :------------------------- | :-------------------------------------------- | :-------------- |
+| `npm run test`             | Executes the full test suite (UI & API)       | All Scenarios   |
+| `npm run test:ui`          | Triggers only browser-based tests             | `@ui`           |
+| `npm run test:api`         | Triggers only REST API validation tests       | `@api`          |
+| `npm run report`           | Processes JSON results into an HTML dashboard | `./report.js`   |
+| `npm run clean`            | Purges old screenshots and report artifacts   | `/test-results` |
+| `npm run install:browsers` | Downloads necessary Playwright binaries       | Chromium        |
+
+---
+
+### 💡 Advanced Execution Tips
+
+**Running with a visible browser (Headed):**
+By default, the framework runs in Headless mode for speed. To watch the execution:
+
+```bash
+HEADLESS=false npm run test:ui
+```
+
+---
 
 ## 📊 Reporting and Debugging
 
@@ -95,6 +113,8 @@ The framework is configured to provide maximum visibility into failures:
 - HTML Dashboard: Open test-results/report/index.html after a run.
 
 - API Logs: In the HTML report, expand a failed API step to see the request URL and the JSON response body that triggered the failure
+
+---
 
 ## 📂 Project Structure
 
@@ -115,3 +135,5 @@ The framework is configured to provide maximum visibility into failures:
 ├── README.md                    # Project documentation and setup guide
 └── tsconfig.json                # TypeScript compiler configuration
 ```
+
+---
