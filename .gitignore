@@ -1,0 +1,21 @@
+
+# Node modules
+node_modules/
+dist/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Environment secrets
+.env
+.auth
+
+# Test results and artifacts
+test-results/
+screenshots/
+cucumber_report.json
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

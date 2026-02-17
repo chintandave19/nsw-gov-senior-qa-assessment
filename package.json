@@ -1,0 +1,38 @@
+{
+  "name": "nsw-gov-senior-qa-assessment",
+  "version": "1.0.0",
+  "description": "Senior QA Framework: Playwright + TypeScript + Cucumber",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "cucumber-js",
+    "test:ui": "cucumber-js --tags @ui",
+    "test:api": "cucumber-js --tags @api",
+    "report": "ts-node src/utils/report.ts",
+    "clean": "rimraf test-results",
+    "install:browsers": "npx playwright install --with-deps chromium"
+  },
+  "keywords": [
+    "playwright",
+    "cucumber",
+    "typescript",
+    "qa",
+    "automation"
+  ],
+  "author": "Chinankumar Dave",
+  "license": "ISC",
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
+    "@cucumber/cucumber": "^11.3.0",
+    "@playwright/test": "^1.50.0",
+    "@types/node": "^20.11.0",
+    "dotenv": "^16.4.7",
+    "lodash": "^4.17.23",
+    "multiple-cucumber-html-reporter": "^3.10.0",
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

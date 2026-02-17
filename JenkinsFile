@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+    
+    tools {
+        nodejs 'NodeJS 18' 
+    }
+
+    stages {
+        stage('Install') {
+            steps {
+                sh 'npm ci'
+                sh 'npx playwright install --with-deps'
+            }
+        }
+        stage('Test') {
+            steps {
+                // Run tests, ignore failure to allow report generation
+                sh 'npm test || true' 
+            }
+        }
+        stage('Report') {
+            steps {
+                sh 'node src/utils/report.ts'
+            }
+        }
+    }
+    post {
+        always {
+            publishHTML(target: [
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'test-results/report',
+                reportFiles: 'index.html',
+                reportName: 'Cucumber BDD Report'
+            ])
+        }
+    }
+}
