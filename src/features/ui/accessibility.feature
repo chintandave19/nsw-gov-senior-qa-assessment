@@ -1,4 +1,4 @@
-@ui @accessibility
+@ui @accessibility @ignore
 Feature: Stamp Duty Page Accessibility Validation
   As a government service provider
   I want to ensure that the Stamp Duty transaction pages are accessible

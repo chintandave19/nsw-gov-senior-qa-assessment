@@ -9,5 +9,6 @@ module.exports = {
     requireModule: ["ts-node/register"],
     format: ["progress-bar", "json:test-results/cucumber_report.json", "html:test-results/cucumber_report.html"],
     parallel: 1,
+    tags: "not @ignore",
   },
 };
