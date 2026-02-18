@@ -23,6 +23,7 @@ jobs:
   test:
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
     env:
       TARGET_ENV: ${{ github.event.inputs.environment || 'staging' }}
       BASE_URL: ${{ vars.BASE_URL }}
@@ -43,6 +44,12 @@ jobs:
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
+
+      - name: Debug Env Vars
+        run: |
+          echo "Checking if BASE_URL is set..."
+          if [ -z "$BASE_URL" ]; then echo "BASE_URL is EMPTY"; else echo "BASE_URL is found"; fi
+          echo "Target Env is: ${{ env.TARGET_ENV }}"
 
       - name: Run Tests
         # Pass .env variables through GitHub Variables/Secrets for security
