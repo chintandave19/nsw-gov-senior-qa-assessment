@@ -13,7 +13,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 // Set global timeout for all Cucumber steps (30 seconds)
-//setDefaultTimeout(30 * 1000);
+setDefaultTimeout(30 * 1000);
 
 // Shared browser instance across all scenarios in the test suite
 let browser: Browser;
@@ -23,7 +23,10 @@ let browser: Browser;
  * Respects the 'HEADLESS' environment variable to toggle UI visibility
  */
 BeforeAll(async function () {
-  browser = await chromium.launch({ headless: process.env.HEADLESS === "true" });
+  browser = await chromium.launch({
+    headless: process.env.HEADLESS === "true",
+    args: ["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-dev-shm-usage"],
+  });
 });
 
 /**
@@ -35,8 +38,19 @@ BeforeAll(async function () {
  */
 Before(async function (this: CustomWorld) {
   // Create a new context and page for each scenario
-  this.context = await browser.newContext();
+  this.context = await browser.newContext({
+    userAgent:
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    viewport: { width: 1280, height: 720 },
+  });
   this.page = await this.context.newPage();
+
+  // Adding Log listner for CI debugging
+  this.page.on("console", (msg) => {
+    if (msg.type() === "error") {
+      console.log(`BROWSER ERROR: "${msg.text()}"`);
+    }
+  });
 
   // Initialize Page Objects with the current page instance
   this.stampDutyPage = new StampDutyPage(this.page);
