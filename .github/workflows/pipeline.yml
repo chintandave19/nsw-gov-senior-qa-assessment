@@ -1,14 +1,34 @@
 name: Playwright Cucumber CI
+
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main]
+  schedule:
+    - cron: "0 21 * * 0-4" # 7 AM AEST (UTC+10) Mon-Fri = 9 PM UTC (Previous Day) Sun-Thu
+  workflow_dispatch: # Allows manual trigger
+    inputs:
+      environment:
+        description: "Select Environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
 
 jobs:
   test:
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    env:
+      TARGET_ENV: ${{ github.event.inputs.environment || 'staging' }}
+      BASE_URL: ${{ vars.BASE_URL }}
+      API_BASE_URL: ${{ vars.API_BASE_URL }}
+      HEADLESS: true
+
     steps:
       - uses: actions/checkout@v4
 
@@ -25,12 +45,8 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run Tests
-        # Pass .env variables through GitHub Secrets for security
+        # Pass .env variables through GitHub Variables/Secrets for security
         run: npm run test
-        env:
-          BASE_URL: ${{ secrets.BASE_URL }}
-          API_BASE_URL: ${{ secrets.API_BASE_URL }}
-          HEADLESS: "true"
 
       - name: Generate HTML Report
         if: always()
@@ -40,5 +56,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cucumber-report
+          name: ${{ env.TARGET_ENV }}-cucumber-report
           path: test-results/report/
