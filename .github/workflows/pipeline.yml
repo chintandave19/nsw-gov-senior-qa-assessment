@@ -53,7 +53,7 @@ jobs:
 
       - name: Run Tests
         # Pass .env variables through GitHub Variables/Secrets for security
-        run: npm run test
+        run: npm run test:ci
 
       - name: Generate HTML Report
         if: always()
