@@ -1,29 +1,66 @@
 pipeline {
     agent any
-    
+
+    parameters {
+        choice(
+            name: 'ENVIRONMENT', 
+            choices: ['staging', 'dev', 'prod'], 
+            description: 'Select Environment'
+        )
+    }
+
+    triggers {
+        // 7 AM AEST (UTC+10) Mon-Fri = 9 PM UTC (Previous Day) Sun-Thu
+        cron('0 21 * * 0-4') // Jenkins cron uses UTC by default on most servers
+    }
+
+    environment {
+        // Default to 'staging' if triggered by cron or push, otherwise use parameter
+        TARGET_ENV = "${params.ENVIRONMENT ?: 'staging'}"
+        
+        BASE_URL = credentials("${TARGET_ENV.toUpperCase()}_BASE_URL")
+        API_BASE_URL = credentials("${TARGET_ENV.toUpperCase()}_API_BASE_URL")
+        
+        HEADLESS = 'true'
+        NODE_ENV = 'test'
+    }
+
     tools {
-        nodejs 'NodeJS 18' 
+        nodejs 'NodeJS 20'
     }
 
     stages {
-        stage('Install') {
+        stage('Setup') {
             steps {
                 sh 'npm ci'
-                sh 'npx playwright install --with-deps'
+                sh 'npx playwright install --with-deps chromium'
             }
         }
+
+        stage('Debug Info') {
+            steps {
+                script {
+                    echo "Running tests against: ${env.TARGET_ENV}"
+                    if (env.BASE_URL == null) {
+                        error "BASE_URL is not defined for environment: ${env.TARGET_ENV}"
+                    }
+                }
+            }
+        }
+
         stage('Test') {
             steps {
-                // Run tests, ignore failure to allow report generation
-                sh 'npm test || true' 
+                sh 'npm test -- --format progress || true' 
             }
         }
+
         stage('Report') {
             steps {
-                sh 'node src/utils/report.ts'
+                sh 'npm run report'
             }
         }
     }
+
     post {
         always {
             publishHTML(target: [
@@ -32,8 +69,11 @@ pipeline {
                 keepAll: true,
                 reportDir: 'test-results/report',
                 reportFiles: 'index.html',
-                reportName: 'Cucumber BDD Report'
+                reportName: "${env.TARGET_ENV.toUpperCase()} - Cucumber BDD Report"
             ])
+            
+            // Archive the report as a Jenkins artifact
+            archiveArtifacts artifacts: 'test-results/report/**', allowEmptyArchive: true
         }
     }
 }
