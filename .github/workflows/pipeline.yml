@@ -1,67 +1,67 @@
-name: Playwright Cucumber CI
+# name: Playwright Cucumber CI
 
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: "0 21 * * 0-4" # 7 AM AEST (UTC+10) Mon-Fri = 9 PM UTC (Previous Day) Sun-Thu
-  workflow_dispatch: # Allows manual trigger
-    inputs:
-      environment:
-        description: "Select Environment"
-        required: true
-        default: "staging"
-        type: choice
-        options:
-          - dev
-          - staging
-          - prod
+# on:
+#   push:
+#     branches: [main, develop]
+#   pull_request:
+#     branches: [main]
+#   schedule:
+#     - cron: "0 21 * * 0-4" # 7 AM AEST (UTC+10) Mon-Fri = 9 PM UTC (Previous Day) Sun-Thu
+#   workflow_dispatch: # Allows manual trigger
+#     inputs:
+#       environment:
+#         description: "Select Environment"
+#         required: true
+#         default: "staging"
+#         type: choice
+#         options:
+#           - dev
+#           - staging
+#           - prod
 
-jobs:
-  test:
-    timeout-minutes: 15
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'staging' }}
-    env:
-      TARGET_ENV: ${{ github.event.inputs.environment || 'staging' }}
-      BASE_URL: ${{ vars.BASE_URL }}
-      API_BASE_URL: ${{ vars.API_BASE_URL }}
-      HEADLESS: true
+# jobs:
+#   test:
+#     timeout-minutes: 15
+#     runs-on: ubuntu-latest
+#     environment: ${{ github.event.inputs.environment || 'staging' }}
+#     env:
+#       TARGET_ENV: ${{ github.event.inputs.environment || 'staging' }}
+#       BASE_URL: ${{ vars.BASE_URL }}
+#       API_BASE_URL: ${{ vars.API_BASE_URL }}
+#       HEADLESS: true
 
-    steps:
-      - uses: actions/checkout@v4
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "20"
+#           cache: "npm"
 
-      - name: Install dependencies
-        run: npm ci
+#       - name: Install dependencies
+#         run: npm ci
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+#       - name: Install Playwright Browsers
+#         run: npx playwright install --with-deps chromium
 
-      - name: Debug Env Vars
-        run: |
-          echo "Checking if BASE_URL is set..."
-          if [ -z "$BASE_URL" ]; then echo "BASE_URL is EMPTY"; else echo "BASE_URL is found"; fi
-          echo "Target Env is: ${{ env.TARGET_ENV }}"
+#       - name: Debug Env Vars
+#         run: |
+#           echo "Checking if BASE_URL is set..."
+#           if [ -z "$BASE_URL" ]; then echo "BASE_URL is EMPTY"; else echo "BASE_URL is found"; fi
+#           echo "Target Env is: ${{ env.TARGET_ENV }}"
 
-      - name: Run Tests
-        # Pass .env variables through GitHub Variables/Secrets for security
-        run: npm run test:ci
+#       - name: Run Tests
+#         # Pass .env variables through GitHub Variables/Secrets for security
+#         run: npm run test:ci
 
-      - name: Generate HTML Report
-        if: always()
-        run: npm run report
+#       - name: Generate HTML Report
+#         if: always()
+#         run: npm run report
 
-      - name: Upload Test Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.TARGET_ENV }}-cucumber-report
-          path: test-results/report/
+#       - name: Upload Test Report
+#         if: always()
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: ${{ env.TARGET_ENV }}-cucumber-report
+#           path: test-results/report/
